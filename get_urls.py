@@ -3,6 +3,7 @@ import json
 
 json_file = "urls.json"
 output_file = "blocked_domains.txt"
+max_size = 100 * 1024 * 1024  # 100 MB
 
 
 def load_urls_from_json(json_file):
@@ -32,7 +33,7 @@ def remove_duplicates(domains):
     return list(set(domains))
 
 
-def main():
+def download():
     # URLs aus der JSON-Datei laden
     list_urls = load_urls_from_json(json_file)
     if not list_urls:
@@ -42,8 +43,8 @@ def main():
     all_domains = []
 
     # Inhalte der Listen abrufen und kombinieren
-    for url in list_urls:
-        print(f"Lade Liste von {url} herunter...")
+    for index, url in enumerate(list_urls, 1):
+        print(f"[{index}/{len(list_urls)}] Lade Liste von {url} herunter...")
         domains = fetch_list(url)
         all_domains.extend(domains)
 
@@ -54,6 +55,28 @@ def main():
         f.write("\n".join(sorted(unique_domains)))
 
     print(f"Bereinigte Blockliste mit {len(unique_domains)} Einträgen wurde in '{output_file}' gespeichert.")
+
+
+def split():
+    with open(output_file, 'rb') as f:
+        part_number = 1
+        while True:
+            chunk = f.read(max_size)
+            if not chunk:
+                break
+            part_name = f"{output_file}_part{part_number}"
+            with open(part_name, 'wb') as part_file:
+                part_file.write(chunk)
+            part_number += 1
+            print(f"Created {part_name}")
+
+
+def main():
+    # Downloaded alle Listen
+    download()
+
+    # Splittet die Datei, wenn sie zu gross ist einzelne Datein mit 100mb
+    split()
 
 
 if __name__ == "__main__":
