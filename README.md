@@ -1,6 +1,6 @@
-# Meine Domain Block Liste für PiHole zusammengefasst
+# My Domain Block List for PiHole Summary
 
 
-### Füge einfach den Link in PiHole ein
-https://raw.githubusercontent.com/Lauvxcz/PiHole_Blocklist/master/blocked_domains.txt
-
+## As concise as possible, each part is 100MB
+### Simply add the links to PiHole
+- LINKS

@@ -2,7 +2,7 @@ import requests
 import json
 
 json_file = "urls.json"
-output_file = "blocked_domains.txt"
+output_file = "lists/blocked_domains.txt"
 max_size = 100 * 1024 * 1024  # 100 MB
 
 
@@ -18,7 +18,7 @@ def load_urls_from_json(json_file):
 
 
 def fetch_list(url):
-    # Lädt die Inhalte einer URL herunter und Löscht unnötige Kommentare
+    # Lädt die Inhalte der URL herunter und Löscht unnötige Kommentare
     try:
         response = requests.get(url)
         response.raise_for_status()
