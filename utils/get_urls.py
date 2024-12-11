@@ -1,7 +1,7 @@
 import requests
 import json
 
-json_file = "urls.json"
+json_file = "../urls.json"
 output_file = "lists/blocked_domains"
 max_size = 100 * 1024 * 1024  # 100 MB
 
