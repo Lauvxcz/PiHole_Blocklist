@@ -16,13 +16,17 @@ def load_urls_from_json(json_file):
 
 
 def check(url):
-    response = requests.get(url)
-    if response.status_code == 404:
-        return False
-    elif response.status_code == 200:
-        return True
-    else:
-        print(response.status_code)
+    try:
+        response = requests.get(url)
+        if response.status_code == 404:
+            return False
+        elif response.status_code == 200:
+            return True
+        else:
+            print(response.status_code)
+            return False
+    except ConnectionError:
+        print(f"Failed to connect to {url}. Skipping...")
         return False
 
 
@@ -37,7 +41,7 @@ def main():
 
     # Inhalte der Listen abrufen
     for index, url in enumerate(list_urls, 1):
-        print(f"[{index}/{len(list_urls)}] Checke Liste von {url} herunter...")
+        print(f"[{index}/{len(list_urls)}] Checking list from {url} ...")
         if check(url):
             urls.extend(url)
 
