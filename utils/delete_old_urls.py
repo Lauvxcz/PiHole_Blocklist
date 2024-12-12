@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import requests
 import json
 
@@ -11,7 +12,7 @@ def load_urls_from_json(json_file):
             data = json.load(f)
             return data.get("urls", [])
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Fehler beim Laden der JSON-Datei: {e}")
+        print(f"Failed to load the JSON-file: {e}")
         return []
 
 
@@ -19,35 +20,53 @@ def check(url):
     try:
         response = requests.get(url)
         if response.status_code == 404:
-            return False
+            return "404", url
         elif response.status_code == 200:
-            return True
+            return "200", url
         else:
-            print(response.status_code)
-            return False
-    except ConnectionError:
-        print(f"Failed to connect to {url}. Skipping...")
-        return False
+            return f"Other: {response.status_code}", url
+    except Exception as err:
+        return f"Error: {err}", url
 
 
 def main():
     # URLs aus der JSON-Datei laden
     list_urls = load_urls_from_json(json_file)
     if not list_urls:
-        print("Keine gültigen URLs in der JSON-Datei gefunden.")
+        print("Failed to load urls from the JSON file.")
         return
 
     urls = []
 
-    # Inhalte der Listen abrufen
-    for index, url in enumerate(list_urls, 1):
-        print(f"[{index}/{len(list_urls)}] Checking list from {url} ...")
-        if check(url):
-            urls.extend(url)
+    num_not_found = 0
+    num_success = 0
+    num_errors = 0
 
-    print(urls)
-    #with open(json_file, "w") as f:
-    #    f.write("\n".join(urls))
+    print("Loading, this may take some time...")
+
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(check, list_urls)
+
+    for status, url in results:
+        if status == "404":
+            num_not_found += 1
+            print(f"Failed to connect to {url}. Skipping... ERROR: 404")
+        elif status == "200":
+            num_success += 1
+            print(f"{url} is OK (Status 200)")
+            urls.append(url)
+        else:
+            num_errors += 1
+            print(f"{url} - {status}")
+
+    print(f"\nSummary:")
+    print(f"URLs with 404: {num_not_found}")
+    print(f"URLs OK (200): {num_success}")
+    print(f"Other errors: {num_errors}")
+
+    with open(json_file, 'w') as file:
+        json.dump({"urls": urls},
+                  file, indent=4)
 
 
 if __name__ == "__main__":
